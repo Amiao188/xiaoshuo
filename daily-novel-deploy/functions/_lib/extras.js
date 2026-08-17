@@ -4,7 +4,8 @@ export async function ensureCommunityTables(env) {
 }
 
 export async function ensureAnalyticsTable(env) {
-  await env.DB.prepare("CREATE TABLE IF NOT EXISTS daily_visits (visit_date TEXT PRIMARY KEY, visits INTEGER NOT NULL DEFAULT 0)").run();
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS daily_unique_visitors (visit_date TEXT NOT NULL, visitor_key TEXT NOT NULL, PRIMARY KEY (visit_date, visitor_key))").run();
+  await env.DB.prepare("CREATE INDEX IF NOT EXISTS daily_unique_visitors_date ON daily_unique_visitors(visit_date DESC)").run();
 }
 
 export function chinaDate() {
