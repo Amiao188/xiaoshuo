@@ -15,6 +15,7 @@
     <nav>
       <button class="nav-link active" data-view="home">今日文库</button>
       <button class="nav-link" data-view="archive">日期归档</button>
+      <button class="nav-link" data-view="messages">留言板</button>
       <button class="account-trigger" id="account-button">登录 / 注册</button>
     </nav>
     <button class="search-trigger" id="search-button" aria-label="搜索小说"><span>⌕</span><span class="search-word">搜索</span></button>
@@ -34,17 +35,30 @@
         </div>
         <div class="hero-art" aria-label="打开的书籍">
           <img src="assets/books.jpg" alt="桌上的一本书">
-          <div class="date-stamp"><span>08</span><span>17</span><small>2026</small></div>
+          <div class="date-stamp"><span id="stamp-month">--</span><span id="stamp-day">--</span><small id="stamp-year">----</small></div>
           <div class="hero-art-caption">TODAY'S<br>STORIES</div>
         </div>
       </section>
 
       <section class="today-section">
         <div class="section-heading">
-          <div><p class="eyebrow">MONDAY / AUGUST 17</p><h2>今天上架</h2></div>
+          <div><p class="eyebrow" id="today-eyebrow">DAILY ARCHIVE</p><h2>今天上架</h2></div>
           <button class="text-link" data-view="archive">查看全部 <span id="featured-count">0</span> 篇 <span>→</span></button>
         </div>
         <div class="story-grid" id="featured-stories"></div>
+      </section>
+    </section>
+
+    <section class="view" id="messages-view">
+      <section class="messages-layout">
+        <div class="archive-head"><p class="eyebrow">THE READER'S WALL</p><h1>留下一句话。</h1><p>读到某个故事时的感受，可以在这里与其他读者分享。</p></div>
+        <form class="message-form" id="message-form">
+          <label for="message-body">写留言</label>
+          <textarea id="message-body" maxlength="500" placeholder="写下你的想法（最多 500 字）"></textarea>
+          <div><small id="message-login-hint">登录后即可留言</small><button class="button primary" type="submit">发布留言</button></div>
+          <p class="account-message" id="message-status" aria-live="polite"></p>
+        </form>
+        <div class="message-list" id="message-list"></div>
       </section>
     </section>
 
@@ -86,7 +100,7 @@
   </main>
 
   <dialog id="search-dialog"><form method="dialog" class="search-modal"><button class="close-button" value="cancel" aria-label="关闭">×</button><p class="eyebrow">SEARCH THE LIBRARY</p><label for="search-input">寻找一个故事</label><input id="search-input" placeholder="输入标题、作者或关键词" autofocus><div id="search-results"></div></form></dialog>
-  <dialog id="account-dialog"><div class="account-modal"><button class="close-button" id="close-account" aria-label="关闭">×</button><p class="eyebrow">MEMBER ACCESS</p><h2 id="account-title">登录</h2><form id="account-form"><label for="account-email">邮箱</label><input id="account-email" type="email" autocomplete="email" required><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" minlength="8" required><p class="account-message" id="account-message" aria-live="polite"></p><button class="button primary" type="submit" id="account-submit">登录</button></form><button class="switch-account" id="switch-account">还没有账号？注册</button><a class="admin-link" id="admin-link" href="admin.html" hidden>进入内容管理 →</a></div></dialog>
+  <dialog id="account-dialog"><div class="account-modal"><button class="close-button" id="close-account" aria-label="关闭">×</button><p class="eyebrow">MEMBER ACCESS</p><h2 id="account-title">登录</h2><form id="account-form"><label for="account-username" id="account-username-label">用户名或邮箱</label><input id="account-username" type="text" autocomplete="username" required><small class="field-hint" id="username-hint">已有账号可使用原邮箱登录</small><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" minlength="8" required><small class="field-hint" id="password-hint">请输入登录密码</small><p class="account-message" id="account-message" aria-live="polite"></p><button class="button primary" type="submit" id="account-submit">登录</button></form><button class="switch-account" id="switch-account">还没有账号？注册</button><a class="admin-link" id="admin-link" href="admin.html" hidden>进入内容管理 →</a></div></dialog>
 
   <script src="app.js"></script>
 </body>
