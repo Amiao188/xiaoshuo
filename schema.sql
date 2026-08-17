@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS stories (
   author TEXT NOT NULL DEFAULT '佚名',
   tag TEXT NOT NULL DEFAULT '未分类',
   publish_date TEXT NOT NULL,
-  minutes INTEGER NOT NULL,
+  minutes INTEGER NOT NULL DEFAULT 0,
   content_json TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('published', 'hidden')) DEFAULT 'published',
   created_by TEXT NOT NULL,
