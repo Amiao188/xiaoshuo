@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日更小说馆</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;500;600;700&family=Source+Han+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="日更小说馆首页"><span class="brand-mark">日</span><span>日更小说馆</span></a>
+    <nav>
+      <button class="nav-link active" data-view="home">今日文库</button>
+      <button class="nav-link" data-view="archive">日期归档</button>
+      <button class="nav-link" data-view="admin">上传</button>
+    </nav>
+    <button class="search-trigger" id="search-button" aria-label="搜索小说"><span>⌕</span><span class="search-word">搜索</span></button>
+  </header>
+
+  <main>
+    <section class="view active" id="home-view">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">A DAILY SHELF OF SHORT FICTION</p>
+          <h1>每一天，<br>都是一个新的故事书架。</h1>
+          <p class="hero-text">每天收录一百篇短篇小说。在这里，按日期挑选一个属于你的故事。</p>
+          <div class="hero-actions">
+            <button class="button primary" data-view="archive">浏览今日 <span id="today-count">0</span> 篇 <span>→</span></button>
+            <button class="button text-button" id="random-button">随便读一篇 <span>↗</span></button>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="打开的书籍">
+          <img src="assets/books.jpg" alt="桌上的一本书">
+          <div class="date-stamp"><span>08</span><span>17</span><small>2026</small></div>
+          <div class="hero-art-caption">TODAY'S<br>STORIES</div>
+        </div>
+      </section>
+
+      <section class="today-section">
+        <div class="section-heading">
+          <div><p class="eyebrow">MONDAY / AUGUST 17</p><h2>今天上架</h2></div>
+          <button class="text-link" data-view="archive">查看全部 <span id="featured-count">0</span> 篇 <span>→</span></button>
+        </div>
+        <div class="story-grid" id="featured-stories"></div>
+      </section>
+    </section>
+
+    <section class="view" id="archive-view">
+      <section class="archive-layout">
+        <div class="archive-head">
+          <p class="eyebrow">THE DAILY ARCHIVE</p>
+          <h1>按日期，找到那天的故事。</h1>
+          <p>每一天的更新都安放在独立的一页里。慢慢翻，也可以直接选择日期。</p>
+        </div>
+        <div class="archive-tools">
+          <label class="month-label" for="month-select">选择月份</label>
+          <select id="month-select"><option>2026 年 8 月</option><option>2026 年 7 月</option></select>
+        </div>
+        <div class="date-list" id="date-list"></div>
+      </section>
+    </section>
+
+    <section class="view" id="day-view">
+      <section class="day-layout">
+        <button class="back-link" data-view="archive">← 返回日期归档</button>
+        <div class="day-head"><p class="eyebrow" id="day-eyebrow">MONDAY / AUGUST 17</p><h1 id="day-title">2026 年 8 月 17 日</h1><p id="day-description">今天收录了 100 篇新故事，愿你在其中停留一会儿。</p></div>
+        <div class="filter-row"><button class="filter-chip selected">全部 <span id="story-count">100</span></button><button class="filter-chip">悬疑</button><button class="filter-chip">都市</button><button class="filter-chip">情感</button><button class="filter-chip">幻想</button></div>
+        <div class="all-story-list" id="day-stories"></div>
+      </section>
+    </section>
+
+    <section class="view reader-view" id="reader-view">
+      <div class="reader-bar"><button class="back-link" data-view="day">← 回到列表</button><div class="reader-actions"><button class="icon-button" id="font-down" aria-label="缩小字号">A−</button><button class="icon-button" id="font-up" aria-label="放大字号">A+</button><button class="icon-button" id="theme-toggle" aria-label="切换阅读主题">◐</button><button class="bookmark" id="bookmark-button">收藏 ♡</button></div></div>
+      <article class="reader-page" id="reader-page">
+        <div class="reader-meta"><span id="reader-category">都市</span><span>·</span><span id="reader-date">2026.08.17</span><span>·</span><span>约 8 分钟</span></div>
+        <h1 id="reader-title">雨停之前</h1>
+        <p class="reader-author" id="reader-author">林野</p>
+        <div class="reader-content" id="reader-content"></div>
+      </article>
+      <div class="reading-progress"><div id="progress-fill"></div></div>
+    </section>
+
+    <section class="view" id="admin-view">
+      <section class="admin-layout">
+        <div class="admin-head"><p class="eyebrow">EDITOR'S DESK</p><h1>上传今日的故事</h1><p>文件会归入指定日期，并保留原始 TXT 文件。标题默认使用文件名。</p></div>
+        <div class="upload-grid">
+          <form class="upload-panel" id="upload-form">
+            <label class="field-label" for="publish-date">归档日期</label>
+            <input id="publish-date" type="date" value="2026-08-17">
+            <label class="drop-zone" for="file-input"><span class="drop-icon">↑</span><strong>选择 TXT 文件</strong><small>可一次选择多篇小说</small><input id="file-input" type="file" accept=".txt,text/plain" multiple></label>
+            <button class="button primary" type="submit">开始整理并上传 <span>→</span></button>
+          </form>
+          <aside class="upload-notes"><div class="note-count" id="upload-count">0</div><p>待上传文件</p><div class="file-list" id="file-list"><span>尚未选择文件</span></div></aside>
+        </div>
+        <div class="admin-tip"><strong>上传规则</strong><span>支持 UTF-8 和 GBK 编码。系统将自动提取第一行作为标题，或使用文件名作为标题。</span></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="search-dialog"><form method="dialog" class="search-modal"><button class="close-button" value="cancel" aria-label="关闭">×</button><p class="eyebrow">SEARCH THE LIBRARY</p><label for="search-input">寻找一个故事</label><input id="search-input" placeholder="输入标题、作者或关键词" autofocus><div id="search-results"></div></form></dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
