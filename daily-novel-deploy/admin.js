@@ -1,10 +1,12 @@
 const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜'];
 const dateInput = document.getElementById('publish-date');
+const deleteDateInput = document.getElementById('delete-date');
 const tagSelect = document.getElementById('default-tag');
 const tagMapInput = document.getElementById('tag-map-input');
 let tagMap = new Map();
 
 dateInput.value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' });
+deleteDateInput.value = dateInput.value;
 tagSelect.innerHTML = TAGS.map(tag => `<option value="${tag}">${tag}</option>`).join('');
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -144,6 +146,20 @@ document.getElementById('publish-form').addEventListener('submit', async event =
     tagMap = new Map();
     document.getElementById('tag-map-status').textContent = '上传下载器生成的标签清单.csv，可自动逐篇匹配标签。';
     showFiles();
+    await loadStories();
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+document.getElementById('delete-date-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const date = deleteDateInput.value;
+  const message = document.getElementById('delete-date-message');
+  if (!confirm(`确认永久删除 ${date} 的全部小说吗？此操作无法恢复。`)) return;
+  message.textContent = '正在删除…';
+  try {
+    const result = await request(`api/admin/stories?date=${encodeURIComponent(date)}`, { method: 'DELETE' });
+    message.textContent = `已永久删除 ${result.deleted} 篇小说。`;
     await loadStories();
   } catch (error) {
     message.textContent = error.message;
