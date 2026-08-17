@@ -15,7 +15,7 @@
     <nav>
       <button class="nav-link active" data-view="home">今日文库</button>
       <button class="nav-link" data-view="archive">日期归档</button>
-      <button class="nav-link" data-view="admin">上传</button>
+      <button class="account-trigger" id="account-button">登录 / 注册</button>
     </nav>
     <button class="search-trigger" id="search-button" aria-label="搜索小说"><span>⌕</span><span class="search-word">搜索</span></button>
   </header>
@@ -83,24 +83,10 @@
       <div class="reading-progress"><div id="progress-fill"></div></div>
     </section>
 
-    <section class="view" id="admin-view">
-      <section class="admin-layout">
-        <div class="admin-head"><p class="eyebrow">EDITOR'S DESK</p><h1>上传今日的故事</h1><p>文件会归入指定日期，并保留原始 TXT 文件。标题默认使用文件名。</p></div>
-        <div class="upload-grid">
-          <form class="upload-panel" id="upload-form">
-            <label class="field-label" for="publish-date">归档日期</label>
-            <input id="publish-date" type="date" value="2026-08-17">
-            <label class="drop-zone" for="file-input"><span class="drop-icon">↑</span><strong>选择 TXT 文件</strong><small>可一次选择多篇小说</small><input id="file-input" type="file" accept=".txt,text/plain" multiple></label>
-            <button class="button primary" type="submit">开始整理并上传 <span>→</span></button>
-          </form>
-          <aside class="upload-notes"><div class="note-count" id="upload-count">0</div><p>待上传文件</p><div class="file-list" id="file-list"><span>尚未选择文件</span></div></aside>
-        </div>
-        <div class="admin-tip"><strong>上传规则</strong><span>支持 UTF-8 和 GBK 编码。系统将自动提取第一行作为标题，或使用文件名作为标题。</span></div>
-      </section>
-    </section>
   </main>
 
   <dialog id="search-dialog"><form method="dialog" class="search-modal"><button class="close-button" value="cancel" aria-label="关闭">×</button><p class="eyebrow">SEARCH THE LIBRARY</p><label for="search-input">寻找一个故事</label><input id="search-input" placeholder="输入标题、作者或关键词" autofocus><div id="search-results"></div></form></dialog>
+  <dialog id="account-dialog"><div class="account-modal"><button class="close-button" id="close-account" aria-label="关闭">×</button><p class="eyebrow">MEMBER ACCESS</p><h2 id="account-title">登录</h2><form id="account-form"><label for="account-email">邮箱</label><input id="account-email" type="email" autocomplete="email" required><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" minlength="8" required><p class="account-message" id="account-message" aria-live="polite"></p><button class="button primary" type="submit" id="account-submit">登录</button></form><button class="switch-account" id="switch-account">还没有账号？注册</button><a class="admin-link" id="admin-link" href="admin.html" hidden>进入内容管理 →</a></div></dialog>
 
   <script src="app.js"></script>
 </body>

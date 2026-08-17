@@ -1,30 +1,31 @@
 const fallbackStories = [
   { id: 'rain-before-stop', title: '雨停之前', author: '林野', tag: '都市', minutes: 8, content: ['凌晨四点十七分，陈末被雨声叫醒。窗外的高架像一条浸在雾里的河，车辆驶过时，没有留下任何声音。她站在窗前，想起昨天傍晚那封没有寄出的信。', '信是写给父亲的。离开家已经七年，她仍然不知道该如何称呼那个总在饭桌上沉默的男人。屏幕上的字删了又写，最后只剩下一句：爸爸，上海下雨了。', '天快亮时，雨忽然停了。她下楼买咖啡，在旧报亭前看见一把深蓝色的伞，伞柄上系着一张被雨水打湿的纸条。纸条上写着：回来吧，饭凉了可以再热。', '陈末站了很久，直到清晨的第一班车驶过街口。她把伞撑开，沿着还没有干透的人行道往前走。远处的云层裂开了一点，光正好落在她的肩上。'] },
   { id: 'last-subway', title: '末班地铁', author: '周寻', tag: '悬疑', minutes: 11 },
-  { id: 'whale-awake', title: '鲸鱼没有睡着', author: '苏青', tag: '幻想', minutes: 9 },
-  { id: 'future-flower-shop', title: '给未来的花店', author: '赵小满', tag: '情感', minutes: 7 },
-  { id: 'night-boat', title: '夜航船', author: '陆桥', tag: '科幻', minutes: 12 },
-  { id: 'brief-snow', title: '一场短暂的雪', author: '陈知白', tag: '情感', minutes: 6 }
+  { id: 'whale-awake', title: '鲸鱼没有睡着', author: '苏青', tag: '幻想', minutes: 9 }
 ];
-const fallbackDates = [{date:'2026-08-17', count:100, note:'今天更新'}, {date:'2026-08-16',count:100,note:'昨日更新'}, {date:'2026-08-15',count:98,note:'周末特辑'}];
-const state = { dates: [], currentDate: null, currentStories: [], fontSize: 19 };
+const fallbackDates = [{date:'2026-08-17', count:3, note:'今天更新'}];
+const state = { dates: [], currentDate: null, currentStories: [], remoteStories: null, fontSize: 19, isRegister: false };
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];
-const dateLabel = (iso) => new Intl.DateTimeFormat('zh-CN', { year:'numeric', month:'long', day:'numeric' }).format(new Date(`${iso}T12:00:00`));
-const shortDate = (iso) => iso.slice(5).replace('-', '.');
-const dayEnglish = (iso) => new Intl.DateTimeFormat('en-US', { weekday:'long', month:'long', day:'numeric' }).format(new Date(`${iso}T12:00:00`)).toUpperCase();
+const dateLabel = iso => new Intl.DateTimeFormat('zh-CN', { year:'numeric', month:'long', day:'numeric' }).format(new Date(`${iso}T12:00:00`));
+const shortDate = iso => iso.slice(5).replace('-', '.');
+const dayEnglish = iso => new Intl.DateTimeFormat('en-US', { weekday:'long', month:'long', day:'numeric' }).format(new Date(`${iso}T12:00:00`)).toUpperCase();
 
 function showView(name) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(`${name}-view`).classList.add('active'); document.querySelectorAll('.nav-link').forEach(b => b.classList.toggle('active', b.dataset.view === name || (name === 'day' && b.dataset.view === 'archive'))); window.scrollTo({top:0, behavior:'smooth'}); }
 function storyCard(story, index) { return `<button class="story-card" data-story="${story.id}"><span class="story-number">${String(index + 1).padStart(2,'0')}</span><h3>${story.title}</h3><p>${story.author} · ${story.minutes} 分钟</p><span class="story-tag">${story.tag}</span></button>`; }
 function renderDates() { document.getElementById('date-list').innerHTML = state.dates.map(day => `<button class="date-row" data-date="${day.date}"><span class="date">${shortDate(day.date)}</span><strong>${dateLabel(day.date)}</strong><small>${day.count} 篇 · ${day.note || '已归档'}</small><span class="arrow">→</span></button>`).join(''); }
 function renderFeatured() { document.getElementById('featured-stories').innerHTML = state.currentStories.slice(0, 3).map(storyCard).join(''); document.getElementById('today-count').textContent = state.currentDate.count; document.getElementById('featured-count').textContent = state.currentDate.count; }
 function renderDay() { const date = state.currentDate; document.getElementById('day-eyebrow').textContent = dayEnglish(date.date); document.getElementById('day-title').textContent = dateLabel(date.date); document.getElementById('day-description').textContent = date.note === '今天更新' ? `今天收录了 ${date.count} 篇新故事，愿你在其中停留一会儿。` : `这一天收录了 ${date.count} 篇故事。`; document.getElementById('story-count').textContent = date.count; document.getElementById('day-stories').innerHTML = state.currentStories.map((story, i) => `<button class="list-story" data-story="${story.id}"><span class="index">${String(i + 1).padStart(3,'0')}</span><strong>${story.title}</strong><span class="author">${story.author}</span><span class="tag">${story.tag} · ${story.minutes} 分钟</span><span>→</span></button>`).join(''); }
-async function selectDate(date) { const entry = state.dates.find(day => day.date === date) || state.dates[0]; state.currentDate = entry; try { const response = await fetch(`data/dates/${entry.date}.json`, {cache:'no-store'}); if (!response.ok) throw new Error('未找到日期数据'); state.currentStories = await response.json(); } catch { state.currentStories = fallbackStories.map((story, i) => ({...story, id: story.id || `sample-${i}`})); } renderFeatured(); renderDay(); }
-async function openStory(id) { let story = state.currentStories.find(item => item.id === id); if (!story) return; if (story.path) { try { const response = await fetch(story.path, {cache:'no-store'}); if (response.ok) story = await response.json(); } catch { /* List data remains readable. */ } } const content = story.content || [...filler, ...filler, ...filler]; document.getElementById('reader-title').textContent = story.title; document.getElementById('reader-author').textContent = story.author; document.getElementById('reader-category').textContent = story.tag; document.getElementById('reader-date').textContent = state.currentDate.date.replaceAll('-', '.'); document.getElementById('reader-content').innerHTML = content.map(p => `<p>${p}</p>`).join(''); showView('reader'); }
+async function selectDate(date) { const entry = state.dates.find(day => day.date === date) || state.dates[0]; state.currentDate = entry; try { if (state.remoteStories) state.currentStories = state.remoteStories[entry.date] || []; else { const response = await fetch(`data/dates/${entry.date}.json`, {cache:'no-store'}); if (!response.ok) throw new Error('未找到日期数据'); state.currentStories = await response.json(); } } catch { state.currentStories = fallbackStories; } renderFeatured(); renderDay(); }
+async function openStory(id) { let story = state.currentStories.find(item => item.id === id); if (!story) return; if (story.path) { try { const response = await fetch(story.path, {cache:'no-store'}); if (response.ok) story = await response.json(); } catch { /* Static list remains readable. */ } } const content = story.content || [...filler, ...filler, ...filler]; document.getElementById('reader-title').textContent = story.title; document.getElementById('reader-author').textContent = story.author; document.getElementById('reader-category').textContent = story.tag; document.getElementById('reader-date').textContent = state.currentDate.date.replaceAll('-', '.'); document.getElementById('reader-content').innerHTML = content.map(p => `<p>${p}</p>`).join(''); showView('reader'); }
 function applyFilter(tag) { document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('selected', c.textContent.trim().startsWith(tag))); document.querySelectorAll('.list-story').forEach(row => { const story = state.currentStories.find(item => item.id === row.dataset.story); row.style.display = tag === '全部' || story?.tag === tag ? '' : 'none'; }); }
-async function loadLibrary() { try { const response = await fetch('data/library.json', {cache:'no-store'}); if (!response.ok) throw new Error('未生成内容库'); const library = await response.json(); state.dates = library.dates; } catch { state.dates = fallbackDates; } await selectDate(state.dates[0].date); renderDates(); }
+async function loadLibrary() { try { const remoteResponse = await fetch('api/library', {cache:'no-store'}); if (remoteResponse.ok) { const remote = await remoteResponse.json(); if (remote.dates?.length) { state.dates = remote.dates; state.remoteStories = remote.stories; await selectDate(state.dates[0].date); renderDates(); return; } } const response = await fetch('data/library.json', {cache:'no-store'}); if (!response.ok) throw new Error('未生成内容库'); state.dates = (await response.json()).dates; } catch { state.dates = fallbackDates; } await selectDate(state.dates[0].date); renderDates(); }
+
+function renderAccount(user) { const button = document.getElementById('account-button'); button.textContent = user ? (user.role === 'admin' ? '内容管理' : user.email) : '登录 / 注册'; document.getElementById('admin-link').hidden = user?.role !== 'admin'; }
+async function refreshAccount() { try { const response = await fetch('api/auth/me', {cache:'no-store'}); if (!response.ok) return renderAccount(null); renderAccount((await response.json()).user); } catch { renderAccount(null); } }
+function setAccountMode(register) { state.isRegister = register; document.getElementById('account-title').textContent = register ? '注册' : '登录'; document.getElementById('account-submit').textContent = register ? '创建账号' : '登录'; document.getElementById('switch-account').textContent = register ? '已有账号？登录' : '还没有账号？注册'; document.getElementById('account-password').autocomplete = register ? 'new-password' : 'current-password'; document.getElementById('account-message').textContent = ''; }
 
 document.addEventListener('click', async event => { const viewButton = event.target.closest('[data-view]'); if (viewButton) { showView(viewButton.dataset.view); return; } const storyButton = event.target.closest('[data-story]'); if (storyButton) { await openStory(storyButton.dataset.story); return; } const dateButton = event.target.closest('[data-date]'); if (dateButton) { await selectDate(dateButton.dataset.date); showView('day'); return; } const filter = event.target.closest('.filter-chip'); if (filter) applyFilter(filter.textContent.trim().split(' ')[0]); });
-document.getElementById('random-button').addEventListener('click', () => { const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)]; openStory(story.id); });
+document.getElementById('random-button').addEventListener('click', () => { const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)]; if (story) openStory(story.id); });
 document.getElementById('search-button').addEventListener('click', () => { document.getElementById('search-dialog').showModal(); document.getElementById('search-input').focus(); });
 document.getElementById('search-input').addEventListener('input', e => { const q = e.target.value.trim(); const results = q ? state.currentStories.filter(s => `${s.title}${s.author}${s.tag}`.includes(q)) : []; document.getElementById('search-results').innerHTML = results.map(s => `<button class="search-result" data-story="${s.id}"><strong>${s.title}</strong><span>${s.author} · ${s.tag}</span></button>`).join('') || (q ? '<p class="text-muted">没有找到相关故事</p>' : ''); });
 document.getElementById('search-results').addEventListener('click', async e => { const item = e.target.closest('[data-story]'); if (item) { document.getElementById('search-dialog').close(); await openStory(item.dataset.story); } });
@@ -32,7 +33,30 @@ document.getElementById('font-up').addEventListener('click', () => { state.fontS
 document.getElementById('font-down').addEventListener('click', () => { state.fontSize = Math.max(state.fontSize - 1, 15); document.getElementById('reader-content').style.fontSize = `${state.fontSize}px`; });
 document.getElementById('theme-toggle').addEventListener('click', () => document.getElementById('reader-view').classList.toggle('night'));
 document.getElementById('bookmark-button').addEventListener('click', e => { e.currentTarget.classList.toggle('saved'); e.currentTarget.innerHTML = e.currentTarget.classList.contains('saved') ? '已收藏 ♥' : '收藏 ♡'; });
-document.getElementById('file-input').addEventListener('change', e => { const files = [...e.target.files]; document.getElementById('upload-count').textContent = files.length; document.getElementById('file-list').innerHTML = files.length ? files.slice(0, 7).map(f => `<span>${f.name}</span>`).join('') + (files.length > 7 ? `<span>… 还有 ${files.length - 7} 篇</span>` : '') : '<span>尚未选择文件</span>'; });
-document.getElementById('upload-form').addEventListener('submit', e => { e.preventDefault(); const files = document.getElementById('file-input').files; if (!files.length) { alert('请先选择 TXT 文件。'); return; } alert(`已整理 ${files.length} 个文件，归档到 ${document.getElementById('publish-date').value}。\n将这些文件放进 content/${document.getElementById('publish-date').value}/ 后运行构建脚本，即可正式发布。`); });
+document.getElementById('account-button').addEventListener('click', () => { document.getElementById('account-dialog').showModal(); });
+document.getElementById('close-account').addEventListener('click', () => document.getElementById('account-dialog').close());
+document.getElementById('switch-account').addEventListener('click', () => setAccountMode(!state.isRegister));
+document.getElementById('account-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const message = document.getElementById('account-message');
+  message.textContent = '处理中…';
+  try {
+    const response = await fetch(`api/auth/${state.isRegister ? 'register' : 'login'}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('account-email').value,
+        password: document.getElementById('account-password').value
+      })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || '操作失败');
+    renderAccount(result.user);
+    message.textContent = state.isRegister ? '注册成功。' : '登录成功。';
+    if (result.user.role === 'admin') document.getElementById('admin-link').hidden = false;
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
 window.addEventListener('scroll', () => { const article = document.getElementById('reader-page'); if (!document.getElementById('reader-view').classList.contains('active')) return; const max = article.offsetTop + article.offsetHeight - window.innerHeight; document.getElementById('progress-fill').style.width = `${Math.min(100, Math.max(0, window.scrollY / Math.max(1, max) * 100))}%`; });
-loadLibrary();
+setAccountMode(false); loadLibrary(); refreshAccount();
