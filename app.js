@@ -82,7 +82,7 @@ async function selectDate(date) {
   renderDay();
 }
 
-async function openStory(id) {
+async function openStory(id, rememberHistory = true) {
   const story = state.currentStories.find(item => item.id === id);
   if (!story) return;
   const content = story.content?.length ? story.content : [...filler, ...filler, ...filler];
@@ -96,6 +96,11 @@ async function openStory(id) {
     node.textContent = paragraph;
     return node;
   }));
+  if (rememberHistory) {
+    const readerUrl = new URL(window.location.href);
+    readerUrl.hash = 'reading';
+    history.pushState({ view: 'reader', date: state.currentDate.date, storyId: story.id }, '', readerUrl);
+  }
   showView('reader');
 }
 
@@ -232,8 +237,20 @@ window.addEventListener('scroll', () => {
   const max = article.offsetTop + article.offsetHeight - window.innerHeight;
   document.getElementById('progress-fill').style.width = `${Math.min(100, Math.max(0, window.scrollY / Math.max(1, max) * 100))}%`;
 });
+window.addEventListener('popstate', async event => {
+  const page = event.state;
+  if (page?.view === 'reader' && page.date && page.storyId) {
+    await selectDate(page.date);
+    await openStory(page.storyId, false);
+    return;
+  }
+  showView('home');
+});
 
 async function init() {
+  const homeUrl = new URL(window.location.href);
+  homeUrl.hash = '';
+  history.replaceState({ view: 'home' }, '', homeUrl);
   setAccountMode(false);
   await refreshAccount();
   await loadLibrary();
