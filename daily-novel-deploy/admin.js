@@ -4,6 +4,8 @@ const deleteDateInput = document.getElementById('delete-date');
 const tagSelect = document.getElementById('default-tag');
 const tagMapInput = document.getElementById('tag-map-input');
 const supportQrInput = document.getElementById('support-qr-input');
+const developerNoteInput = document.getElementById('developer-note-input');
+const DEFAULT_DEVELOPER_NOTE = '感谢你来到日更小说馆。愿这些短篇故事，能陪你度过一段轻松的阅读时间。';
 let tagMap = new Map();
 
 dateInput.value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' });
@@ -119,10 +121,11 @@ function showSupportQr(imageData) {
   if (imageData) preview.src = imageData;
 }
 
-async function loadSupportQr() {
+async function loadSupportSettings() {
   try {
-    const { supportQr } = await request('api/admin/settings');
+    const { supportQr, developerNote } = await request('api/admin/settings');
     showSupportQr(supportQr);
+    developerNoteInput.value = developerNote || DEFAULT_DEVELOPER_NOTE;
   } catch (error) {
     document.getElementById('support-qr-message').textContent = error.message;
   }
@@ -146,21 +149,22 @@ document.getElementById('support-qr-form').addEventListener('submit', async even
   event.preventDefault();
   const file = supportQrInput.files[0];
   const message = document.getElementById('support-qr-message');
-  if (!file) { message.textContent = '请先选择收款码图片。'; return; }
-  if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) { message.textContent = '请选择 PNG、JPG、WebP 或 GIF 图片。'; return; }
-  if (file.size > 1024 * 1024) { message.textContent = '收款码图片不能超过 1 MB。'; return; }
+  const developerNote = developerNoteInput.value.trim();
+  if (!developerNote) { message.textContent = '请填写开发者有话说。'; return; }
+  if (file && !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) { message.textContent = '请选择 PNG、JPG、WebP 或 GIF 图片。'; return; }
+  if (file && file.size > 1024 * 1024) { message.textContent = '收款码图片不能超过 1 MB。'; return; }
   message.textContent = '正在保存…';
   try {
-    const imageData = await new Promise((resolve, reject) => {
+    const imageData = file ? await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
       reader.onerror = () => reject(new Error('图片读取失败。'));
       reader.readAsDataURL(file);
-    });
-    await request('api/admin/settings', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageData }) });
-    message.textContent = '收款码已保存，读者端会立即显示。';
-    event.target.reset();
-    showSupportQr(imageData);
+    }) : undefined;
+    await request('api/admin/settings', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ developerNote, ...(imageData ? { imageData } : {}) }) });
+    message.textContent = imageData ? '开发者有话说和收款码已保存。' : '开发者有话说已保存。';
+    supportQrInput.value = '';
+    if (imageData) showSupportQr(imageData);
   } catch (error) {
     message.textContent = error.message;
   }
@@ -235,5 +239,5 @@ document.getElementById('logout-button').addEventListener('click', async () => {
 verifyAdmin();
 loadStories();
 loadAnalytics();
-loadSupportQr();
+loadSupportSettings();
 loadMessages();
