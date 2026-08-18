@@ -1,5 +1,5 @@
 const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜'];
-const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, fontSize: 19, isRegister: false, user: null, selectedTag: '全部' };
+const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', supportQr: null };
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];
 const dateLabel = iso => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${iso}T12:00:00`));
 const shortDate = iso => iso.slice(5).replace('-', '.');
@@ -16,6 +16,12 @@ function showView(name) {
 
 function visibleStories() {
   return state.selectedTag === '全部' ? state.currentStories : state.currentStories.filter(story => story.tag === state.selectedTag);
+}
+
+function renderSupportQr() {
+  const section = document.getElementById('reader-support');
+  section.hidden = !state.supportQr;
+  if (state.supportQr) document.getElementById('reader-support-qr').src = state.supportQr;
 }
 
 function storyCard(story, index) {
@@ -96,6 +102,7 @@ async function openStory(id, rememberHistory = true) {
     node.textContent = paragraph;
     return node;
   }));
+  renderSupportQr();
   if (rememberHistory) {
     const readerUrl = new URL(window.location.href);
     readerUrl.hash = 'reading';
@@ -120,6 +127,16 @@ async function loadLibrary() {
   renderDates();
   renderFeatured();
   renderDay();
+}
+
+async function loadSiteSettings() {
+  try {
+    const response = await fetch('api/settings', { cache: 'no-store' });
+    if (!response.ok) return;
+    state.supportQr = (await response.json()).supportQr || null;
+  } catch {
+    state.supportQr = null;
+  }
 }
 
 function renderAccount(user) {
@@ -253,6 +270,7 @@ async function init() {
   history.replaceState({ view: 'home' }, '', homeUrl);
   setAccountMode(false);
   await refreshAccount();
+  await loadSiteSettings();
   await loadLibrary();
   if (state.user?.role !== 'admin') fetch('api/analytics/visit', { method: 'POST' }).catch(() => null);
 }

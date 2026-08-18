@@ -3,6 +3,7 @@ const dateInput = document.getElementById('publish-date');
 const deleteDateInput = document.getElementById('delete-date');
 const tagSelect = document.getElementById('default-tag');
 const tagMapInput = document.getElementById('tag-map-input');
+const supportQrInput = document.getElementById('support-qr-input');
 let tagMap = new Map();
 
 dateInput.value = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' });
@@ -110,6 +111,23 @@ async function loadAnalytics() {
   }
 }
 
+function showSupportQr(imageData) {
+  const preview = document.getElementById('support-qr-preview');
+  const removeButton = document.getElementById('remove-support-qr');
+  preview.hidden = !imageData;
+  removeButton.hidden = !imageData;
+  if (imageData) preview.src = imageData;
+}
+
+async function loadSupportQr() {
+  try {
+    const { supportQr } = await request('api/admin/settings');
+    showSupportQr(supportQr);
+  } catch (error) {
+    document.getElementById('support-qr-message').textContent = error.message;
+  }
+}
+
 async function loadMessages() {
   const target = document.getElementById('admin-message-list');
   target.textContent = '正在读取…';
@@ -124,6 +142,41 @@ async function loadMessages() {
 document.getElementById('file-input').addEventListener('change', showFiles);
 tagSelect.addEventListener('change', showFiles);
 tagMapInput.addEventListener('change', async () => { await loadTagMap(); showFiles(); });
+document.getElementById('support-qr-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const file = supportQrInput.files[0];
+  const message = document.getElementById('support-qr-message');
+  if (!file) { message.textContent = '请先选择收款码图片。'; return; }
+  if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type)) { message.textContent = '请选择 PNG、JPG、WebP 或 GIF 图片。'; return; }
+  if (file.size > 1024 * 1024) { message.textContent = '收款码图片不能超过 1 MB。'; return; }
+  message.textContent = '正在保存…';
+  try {
+    const imageData = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('图片读取失败。'));
+      reader.readAsDataURL(file);
+    });
+    await request('api/admin/settings', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ imageData }) });
+    message.textContent = '收款码已保存，读者端会立即显示。';
+    event.target.reset();
+    showSupportQr(imageData);
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
+document.getElementById('remove-support-qr').addEventListener('click', async () => {
+  if (!confirm('确认移除收款码吗？读者端将不再显示。')) return;
+  const message = document.getElementById('support-qr-message');
+  message.textContent = '正在移除…';
+  try {
+    await request('api/admin/settings', { method: 'DELETE' });
+    message.textContent = '收款码已移除。';
+    showSupportQr(null);
+  } catch (error) {
+    message.textContent = error.message;
+  }
+});
 document.getElementById('publish-form').addEventListener('submit', async event => {
   event.preventDefault();
   const message = document.getElementById('publish-message');
@@ -182,4 +235,5 @@ document.getElementById('logout-button').addEventListener('click', async () => {
 verifyAdmin();
 loadStories();
 loadAnalytics();
+loadSupportQr();
 loadMessages();

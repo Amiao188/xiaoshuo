@@ -32,3 +32,9 @@ CREATE TABLE IF NOT EXISTS stories (
 
 CREATE INDEX IF NOT EXISTS stories_published_date ON stories(status, publish_date DESC);
 CREATE INDEX IF NOT EXISTS sessions_token ON sessions(token_hash);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  setting_key TEXT PRIMARY KEY,
+  setting_value TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
