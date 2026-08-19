@@ -1,5 +1,5 @@
 const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜'];
-const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', supportQr: null, developerNote: null };
+const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null };
 const DEFAULT_DEVELOPER_NOTE = '感谢你来到日更小说馆。愿这些短篇故事，能陪你度过一段轻松的阅读时间。';
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];
 const dateLabel = iso => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${iso}T12:00:00`));
@@ -22,8 +22,16 @@ function visibleStories() {
 function renderDeveloperNote() {
   document.getElementById('developer-note-body').textContent = state.developerNote || DEFAULT_DEVELOPER_NOTE;
   const section = document.getElementById('developer-support');
-  section.hidden = !state.supportQr;
-  if (state.supportQr) document.getElementById('developer-support-qr').src = state.supportQr;
+  section.hidden = !state.hasSupportQr;
+  if (!state.hasSupportQr) document.getElementById('developer-support-qr').removeAttribute('src');
+}
+
+function loadSupportQrWhenOpened() {
+  const note = document.getElementById('developer-note');
+  if (note.open && state.hasSupportQr) {
+    const image = document.getElementById('developer-support-qr');
+    if (!image.getAttribute('src')) image.src = 'api/support-qr';
+  }
 }
 
 function storyCard(story, index) {
@@ -93,7 +101,18 @@ async function selectDate(date) {
 async function openStory(id, rememberHistory = true) {
   const story = state.currentStories.find(item => item.id === id);
   if (!story) return;
-  const content = story.content?.length ? story.content : [...filler, ...filler, ...filler];
+  if (!story.content) {
+    try {
+      const response = await fetch(`api/library?storyId=${encodeURIComponent(story.id)}`, { cache: 'no-store' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || '正文加载失败');
+      story.content = result.story.content;
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+  }
+  const content = story.content.length ? story.content : [...filler, ...filler, ...filler];
   document.getElementById('reader-title').textContent = story.title;
   document.getElementById('reader-author').textContent = story.author;
   document.getElementById('reader-category').textContent = story.tag;
@@ -135,11 +154,11 @@ async function loadSiteSettings() {
     const response = await fetch('api/settings', { cache: 'no-store' });
     if (!response.ok) return;
     const settings = await response.json();
-    state.supportQr = settings.supportQr || null;
+    state.hasSupportQr = Boolean(settings.hasSupportQr);
     state.developerNote = settings.developerNote || null;
     renderDeveloperNote();
   } catch {
-    state.supportQr = null;
+    state.hasSupportQr = false;
     state.developerNote = null;
     renderDeveloperNote();
   }
@@ -205,6 +224,7 @@ document.getElementById('random-button').addEventListener('click', () => {
   const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)];
   if (story) openStory(story.id);
 });
+document.getElementById('developer-note').addEventListener('toggle', loadSupportQrWhenOpened);
 document.getElementById('search-button').addEventListener('click', () => { document.getElementById('search-dialog').showModal(); document.getElementById('search-input').focus(); });
 document.getElementById('search-input').addEventListener('input', event => {
   const query = event.target.value.trim();
