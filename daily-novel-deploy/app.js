@@ -23,15 +23,9 @@ function renderDeveloperNote() {
   document.getElementById('developer-note-body').textContent = state.developerNote || DEFAULT_DEVELOPER_NOTE;
   const section = document.getElementById('developer-support');
   section.hidden = !state.hasSupportQr;
-  if (!state.hasSupportQr) document.getElementById('developer-support-qr').removeAttribute('src');
-}
-
-function loadSupportQrWhenOpened() {
-  const note = document.getElementById('developer-note');
-  if (note.open && state.hasSupportQr) {
-    const image = document.getElementById('developer-support-qr');
-    if (!image.getAttribute('src')) image.src = 'api/support-qr';
-  }
+  const image = document.getElementById('developer-support-qr');
+  if (state.hasSupportQr) image.src = 'api/support-qr';
+  else image.removeAttribute('src');
 }
 
 function storyCard(story, index) {
@@ -279,9 +273,6 @@ window.addEventListener('scroll', () => {
   const max = article.offsetTop + article.offsetHeight - window.innerHeight;
   document.getElementById('progress-fill').style.width = `${Math.min(100, Math.max(0, window.scrollY / Math.max(1, max) * 100))}%`;
 });
-const developerNote = document.getElementById('developer-note');
-developerNote.addEventListener('toggle', loadSupportQrWhenOpened);
-developerNote.querySelector('summary').addEventListener('click', () => setTimeout(loadSupportQrWhenOpened, 0));
 window.addEventListener('popstate', async event => {
   const page = event.state;
   if (page?.view === 'reader' && page.date && page.storyId) {

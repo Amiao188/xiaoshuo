@@ -23,15 +23,9 @@ function renderDeveloperNote() {
   document.getElementById('developer-note-body').textContent = state.developerNote || DEFAULT_DEVELOPER_NOTE;
   const section = document.getElementById('developer-support');
   section.hidden = !state.hasSupportQr;
-  if (!state.hasSupportQr) document.getElementById('developer-support-qr').removeAttribute('src');
-}
-
-function loadSupportQrWhenOpened() {
-  const note = document.getElementById('developer-note');
-  if (note.open && state.hasSupportQr) {
-    const image = document.getElementById('developer-support-qr');
-    if (!image.getAttribute('src')) image.src = 'api/support-qr';
-  }
+  const image = document.getElementById('developer-support-qr');
+  if (state.hasSupportQr) image.src = 'api/support-qr';
+  else image.removeAttribute('src');
 }
 
 function storyCard(story, index) {
@@ -224,9 +218,6 @@ document.getElementById('random-button').addEventListener('click', () => {
   const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)];
   if (story) openStory(story.id);
 });
-const developerNote = document.getElementById('developer-note');
-developerNote.addEventListener('toggle', loadSupportQrWhenOpened);
-developerNote.querySelector('summary').addEventListener('click', () => setTimeout(loadSupportQrWhenOpened, 0));
 document.getElementById('search-button').addEventListener('click', () => { document.getElementById('search-dialog').showModal(); document.getElementById('search-input').focus(); });
 document.getElementById('search-input').addEventListener('input', event => {
   const query = event.target.value.trim();
