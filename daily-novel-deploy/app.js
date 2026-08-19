@@ -279,7 +279,9 @@ window.addEventListener('scroll', () => {
   const max = article.offsetTop + article.offsetHeight - window.innerHeight;
   document.getElementById('progress-fill').style.width = `${Math.min(100, Math.max(0, window.scrollY / Math.max(1, max) * 100))}%`;
 });
-document.getElementById('developer-note').addEventListener('toggle', loadSupportQrWhenOpened);
+const developerNote = document.getElementById('developer-note');
+developerNote.addEventListener('toggle', loadSupportQrWhenOpened);
+developerNote.querySelector('summary').addEventListener('click', () => setTimeout(loadSupportQrWhenOpened, 0));
 window.addEventListener('popstate', async event => {
   const page = event.state;
   if (page?.view === 'reader' && page.date && page.storyId) {

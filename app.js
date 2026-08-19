@@ -224,7 +224,9 @@ document.getElementById('random-button').addEventListener('click', () => {
   const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)];
   if (story) openStory(story.id);
 });
-document.getElementById('developer-note').addEventListener('toggle', loadSupportQrWhenOpened);
+const developerNote = document.getElementById('developer-note');
+developerNote.addEventListener('toggle', loadSupportQrWhenOpened);
+developerNote.querySelector('summary').addEventListener('click', () => setTimeout(loadSupportQrWhenOpened, 0));
 document.getElementById('search-button').addEventListener('click', () => { document.getElementById('search-dialog').showModal(); document.getElementById('search-input').focus(); });
 document.getElementById('search-input').addEventListener('input', event => {
   const query = event.target.value.trim();
