@@ -1,5 +1,5 @@
 const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜'];
-const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null };
+const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, featuredStories: [], loadingDate: null, dateLoadError: null, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null };
 const DEFAULT_DEVELOPER_NOTE = '感谢你来到日更小说馆。愿这些短篇故事，能陪你度过一段轻松的阅读时间。';
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];
 const dateLabel = iso => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${iso}T12:00:00`));
@@ -49,7 +49,7 @@ function renderFeatured() {
     document.getElementById('today-eyebrow').textContent = 'DAILY ARCHIVE';
     return;
   }
-  target.innerHTML = state.currentStories.slice(0, 3).map(storyCard).join('');
+  target.innerHTML = state.featuredStories.map(storyCard).join('') || '<p class="text-muted">今天还没有上架小说。</p>';
   const [year, month, day] = date.date.split('-');
   document.getElementById('stamp-year').textContent = year;
   document.getElementById('stamp-month').textContent = month;
@@ -75,6 +75,16 @@ function renderDay() {
   document.getElementById('day-eyebrow').textContent = dayEnglish(date.date);
   document.getElementById('day-title').textContent = dateLabel(date.date);
   document.getElementById('day-description').textContent = `这一天收录了 ${date.count} 篇故事。`;
+  if (state.loadingDate === date.date) {
+    document.getElementById('filter-row').innerHTML = '';
+    document.getElementById('day-stories').innerHTML = '<p class="text-muted">正在加载当天小说…</p>';
+    return;
+  }
+  if (state.dateLoadError) {
+    document.getElementById('filter-row').innerHTML = '';
+    document.getElementById('day-stories').textContent = state.dateLoadError;
+    return;
+  }
   renderFilters();
   const stories = visibleStories();
   document.getElementById('day-stories').innerHTML = stories.length
@@ -86,14 +96,40 @@ async function selectDate(date) {
   const entry = state.dates.find(day => day.date === date) || state.dates[0];
   if (!entry) return;
   state.currentDate = entry;
-  state.currentStories = state.remoteStories[entry.date] || [];
   state.selectedTag = '全部';
+  if (state.remoteStories[entry.date]) {
+    state.currentStories = state.remoteStories[entry.date];
+    renderDay();
+    return;
+  }
+  state.currentStories = [];
+  state.loadingDate = entry.date;
+  state.dateLoadError = null;
   renderFeatured();
   renderDay();
+  try {
+    const response = await fetch(`api/library?date=${encodeURIComponent(entry.date)}`);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || '当天小说加载失败');
+    state.remoteStories[entry.date] = result.stories || [];
+    state.currentStories = state.remoteStories[entry.date];
+  } catch (error) {
+    state.dateLoadError = error.message;
+  } finally {
+    state.loadingDate = null;
+    renderDay();
+  }
 }
 
 async function openStory(id, rememberHistory = true) {
-  const story = state.currentStories.find(item => item.id === id);
+  let story = state.currentStories.find(item => item.id === id);
+  if (!story) {
+    const featured = state.featuredStories.find(item => item.id === id);
+    if (featured) {
+      await selectDate(featured.publish_date);
+      story = state.currentStories.find(item => item.id === id);
+    }
+  }
   if (!story) return;
   if (!story.content) {
     try {
@@ -127,12 +163,13 @@ async function openStory(id, rememberHistory = true) {
 
 async function loadLibrary() {
   try {
-    const response = await fetch('api/library', { cache: 'no-store' });
+    const response = await fetch('api/library');
     if (!response.ok) throw new Error('内容库暂不可用');
     const remote = await response.json();
     state.dates = remote.dates || [];
-    state.remoteStories = remote.stories || {};
-    await selectDate(state.dates[0]?.date);
+    state.featuredStories = remote.featured || [];
+    state.currentDate = state.dates[0] || null;
+    state.currentStories = [];
   } catch {
     state.dates = [];
     state.currentDate = null;
@@ -209,12 +246,13 @@ document.addEventListener('click', async event => {
   const storyButton = event.target.closest('[data-story]');
   if (storyButton) return openStory(storyButton.dataset.story);
   const dateButton = event.target.closest('[data-date]');
-  if (dateButton) { await selectDate(dateButton.dataset.date); return showView('day'); }
+  if (dateButton) { showView('day'); await selectDate(dateButton.dataset.date); return; }
   const filter = event.target.closest('[data-filter]');
   if (filter) { state.selectedTag = filter.dataset.filter; renderDay(); }
 });
 
-document.getElementById('random-button').addEventListener('click', () => {
+document.getElementById('random-button').addEventListener('click', async () => {
+  if (!state.currentStories.length && state.currentDate) await selectDate(state.currentDate.date);
   const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)];
   if (story) openStory(story.id);
 });
@@ -288,9 +326,7 @@ async function init() {
   homeUrl.hash = '';
   history.replaceState({ view: 'home' }, '', homeUrl);
   setAccountMode(false);
-  await refreshAccount();
-  await loadSiteSettings();
-  await loadLibrary();
+  await Promise.all([refreshAccount(), loadSiteSettings(), loadLibrary()]);
   if (state.user?.role !== 'admin') fetch('api/analytics/visit', { method: 'POST' }).catch(() => null);
 }
 init();

@@ -1,4 +1,4 @@
-:root { --ink:#1f2f31; --paper:#f8f4ed; --paper-deep:#efe8dc; --line:#d8d0c3; --red:#d94734; --yellow:#f4ca50; --teal:#8fc6b5; --blue:#c6d7e8; --serif:'Noto Serif SC', serif; --sans:'Source Han Sans SC', sans-serif; --mono:'DM Mono', monospace; }
+:root { --ink:#1f2f31; --paper:#f8f4ed; --paper-deep:#efe8dc; --line:#d8d0c3; --red:#d94734; --yellow:#f4ca50; --teal:#8fc6b5; --blue:#c6d7e8; --serif:'Songti SC','STSong','SimSun',serif; --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',Arial,sans-serif; --mono:'Cascadia Mono','SFMono-Regular','Microsoft YaHei',monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; color:var(--ink); background:var(--paper); font-family:var(--sans); }
