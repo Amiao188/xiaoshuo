@@ -1,4 +1,4 @@
-const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜', '宫斗'];
+const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜', '宫斗', '重生', '爽文', '脑洞', '治愈', '校园'];
 const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, featuredStories: [], loadingDate: null, dateLoadError: null, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null, selectedMonth: null, listMode: 'day' };
 const DEFAULT_DEVELOPER_NOTE = '感谢你来到日更小说馆。愿这些短篇故事，能陪你度过一段轻松的阅读时间。';
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];

@@ -1,4 +1,4 @@
-const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜', '宫斗'];
+const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜', '宫斗', '重生', '爽文', '脑洞', '治愈', '校园'];
 const dateInput = document.getElementById('publish-date');
 const deleteDateInput = document.getElementById('delete-date');
 const tagSelect = document.getElementById('default-tag');
