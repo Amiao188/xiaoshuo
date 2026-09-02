@@ -3,109 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#182526">
   <title>日更小说馆</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="#home" aria-label="日更小说馆首页"><span class="brand-mark">日</span><span>日更小说馆</span></a>
-    <nav>
-      <button class="nav-link active" data-view="home">今日文库</button>
-      <button class="nav-link" data-view="archive">日期归档</button>
-      <button class="nav-link" data-view="messages">留言板</button>
-      <button class="account-trigger" id="account-button">登录 / 注册</button>
-    </nav>
-    <button class="search-trigger" id="search-button" aria-label="搜索小说"><span>⌕</span><span class="search-word">搜索</span></button>
-  </header>
-
+  <header class="site-header"><a class="brand" href="#home" aria-label="日更小说馆首页"><span class="brand-mark">日</span><span class="brand-name">日更小说馆</span></a><nav aria-label="主导航"><button class="nav-link active" data-view="home">今日</button><button class="nav-link" data-view="archive">归档</button><button class="nav-link" data-view="messages">留言</button></nav><div class="header-actions"><button class="search-trigger" id="search-button" aria-label="搜索小说"><span>⌕</span><span class="search-word">搜索</span></button><button class="account-trigger" id="account-button">登录 / 注册</button></div></header>
   <main>
-    <section class="view active" id="home-view">
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">A DAILY SHELF OF SHORT FICTION</p>
-          <h1>每一天，<br>都是一个新的故事书架。</h1>
-          <p class="library-total" aria-live="polite"><span>已收录</span><strong id="library-total-count">0</strong><span>篇小说</span></p>
-          <details class="developer-note" id="developer-note"><summary><span>开发者有话说</span><span class="developer-note-toggle">查看更多</span></summary><div class="developer-note-body"><p id="developer-note-body"></p><div class="developer-support" id="developer-support" hidden><img id="developer-support-qr" loading="lazy" alt="支持小说馆的收款码"><small>感谢每一份支持</small></div></div></details>
-          <div class="hero-actions">
-            <button class="button primary" id="browse-today">浏览今日 <span id="today-count">0</span> 篇 <span>→</span></button>
-            <button class="button text-button" id="random-button">随便读一篇 <span>↗</span></button>
-          </div>
-        </div>
-        <div class="hero-art" aria-label="打开的书籍">
-          <img src="assets/books.jpg" alt="桌上的一本书">
-          <div class="date-stamp"><span id="stamp-month">--</span><span id="stamp-day">--</span><small id="stamp-year">----</small></div>
-          <div class="hero-art-caption">TODAY'S<br>STORIES</div>
-        </div>
-      </section>
-
-      <section class="today-section">
-        <div class="section-heading">
-          <div><p class="eyebrow" id="today-eyebrow">DAILY ARCHIVE</p><h2>今天上架</h2></div>
-          <button class="text-link" data-view="archive">查看全部 <span id="featured-count">0</span> 篇 <span>→</span></button>
-        </div>
-        <div class="story-grid" id="featured-stories"></div>
-      </section>
-
-      <section class="home-discovery" aria-labelledby="category-title">
-        <div class="section-heading">
-          <div><p class="eyebrow">BROWSE BY CATEGORY</p><h2 id="category-title">按类型找小说</h2></div>
-          <p class="section-note">从全站已收录内容中查找</p>
-        </div>
-        <div class="home-tag-list" id="home-tag-list" aria-label="小说类型"></div>
-      </section>
-
-      <section class="home-archive" id="home-archive">
-        <div class="archive-head">
-          <p class="eyebrow">THE DAILY ARCHIVE</p>
-          <h1>按日期，找到那天的故事。</h1>
-          <p>每一天的更新都安放在独立的一页里。慢慢翻，也可以直接选择日期。</p>
-        </div>
-        <div class="archive-tools">
-          <label class="month-label" for="month-select">选择月份</label>
-          <select id="month-select"></select>
-        </div>
-        <div class="date-list" id="date-list"></div>
-      </section>
-    </section>
-
-    <section class="view" id="messages-view">
-      <section class="messages-layout">
-        <div class="archive-head"><p class="eyebrow">THE READER'S WALL</p><h1>留下一句话。</h1><p>读到某个故事时的感受，可以在这里与其他读者分享。</p></div>
-        <form class="message-form" id="message-form">
-          <label for="message-body">写留言</label>
-          <textarea id="message-body" maxlength="500" placeholder="写下你的想法（最多 500 字）"></textarea>
-          <div><small id="message-login-hint">登录后即可留言</small><button class="button primary" type="submit">发布留言</button></div>
-          <p class="account-message" id="message-status" aria-live="polite"></p>
-        </form>
-        <div class="message-list" id="message-list"></div>
-      </section>
-    </section>
-
-    <section class="view" id="day-view">
-      <section class="day-layout">
-        <button class="back-link" data-view="archive">← 返回日期归档</button>
-        <div class="day-head"><p class="eyebrow" id="day-eyebrow">MONDAY / AUGUST 17</p><h1 id="day-title">2026 年 8 月 17 日</h1><p id="day-description">今天收录了 100 篇新故事，愿你在其中停留一会儿。</p></div>
-        <div class="filter-row" id="filter-row" aria-label="按标签筛选小说"></div>
-        <div class="all-story-list" id="day-stories"></div>
-      </section>
-    </section>
-
-    <section class="view reader-view" id="reader-view">
-      <div class="reader-bar"><button class="back-link" data-view="day">← 回到列表</button><div class="reader-actions"><button class="icon-button" id="font-down" aria-label="缩小字号">A−</button><button class="icon-button" id="font-up" aria-label="放大字号">A+</button><button class="icon-button" id="theme-toggle" aria-label="切换阅读主题">◐</button><button class="bookmark" id="bookmark-button">收藏 ♡</button></div></div>
-      <article class="reader-page" id="reader-page">
-        <div class="reader-meta"><span id="reader-category">悬疑</span><span>·</span><span id="reader-date">2026.08.17</span></div>
-        <h1 id="reader-title">雨停之前</h1>
-        <p class="reader-author" id="reader-author">林野</p>
-        <div class="reader-content" id="reader-content"></div>
-      </article>
-      <div class="reading-progress"><div id="progress-fill"></div></div>
-    </section>
-
+    <section class="view active" id="home-view"><section class="hero"><div class="hero-copy"><div class="hero-label"><span class="hero-dot"></span><span>DAILY FICTION / VOL. 01</span></div><h1>今天，<br><em>读一个</em>新故事。</h1><p class="hero-subtitle">每天更新短篇小说，按日期和类型整理。留一点时间，给一个完全陌生的世界。</p><div class="hero-stats"><div><strong id="library-total-count">0</strong><span>篇已收录</span></div><i></i><div><strong id="today-count">0</strong><span>篇今日更新</span></div></div><div class="hero-actions"><button class="button primary" id="browse-today">进入今日书架<span>↗</span></button><button class="button text-button" id="random-button">随便读一篇<span>↗</span></button></div><details class="developer-note" id="developer-note"><summary><span>开发者有话说</span><span class="developer-note-toggle">展开</span></summary><div class="developer-note-body"><p id="developer-note-body"></p><div class="developer-support" id="developer-support" hidden><img id="developer-support-qr" loading="lazy" alt="支持小说馆的收款码"><small>感谢每一份支持</small></div></div></details></div><div class="hero-art" aria-label="今日书架"><div class="hero-art-frame"><img src="assets/books.jpg" alt="桌上的一本书"></div><div class="date-stamp"><span id="stamp-month">--</span><span id="stamp-day">--</span><small id="stamp-year">----</small></div><div class="hero-art-caption"><span>THE</span><span>DAILY</span><span>SHELF</span></div><div class="hero-art-note">NO. <span id="featured-count">0</span></div></div></section><section class="today-section home-section"><div class="section-heading"><div><p class="eyebrow" id="today-eyebrow">TODAY'S EDITION</p><h2>今天上架</h2></div><button class="text-link" data-view="archive">查看日期归档 <span>→</span></button></div><div class="story-grid" id="featured-stories"></div></section><section class="home-discovery home-section" aria-labelledby="category-title"><div class="section-heading"><div><p class="eyebrow">FIND YOUR MOOD</p><h2 id="category-title">按类型找小说</h2></div><p class="section-note">从全站书架挑一个方向</p></div><div class="home-tag-list" id="home-tag-list" aria-label="小说类型"></div></section><section class="home-archive home-section" id="home-archive"><div class="archive-head"><p class="eyebrow">THE DAILY ARCHIVE</p><h1>按日期，找到那天的故事。</h1><p>每一天的更新都安放在独立的一页里。</p></div><div class="archive-tools"><label class="month-label" for="month-select">选择月份</label><select id="month-select"></select></div><div class="date-list" id="date-list"></div></section></section>
+    <section class="view" id="messages-view"><section class="messages-layout"><div class="archive-head"><p class="eyebrow">THE READER'S WALL</p><h1>留下一句话。</h1><p>读到某个故事时的感受，可以在这里与其他读者分享。</p></div><form class="message-form" id="message-form"><label for="message-body">写留言</label><textarea id="message-body" maxlength="500" placeholder="写下你的想法（最多 500 字）"></textarea><div><small id="message-login-hint">登录后即可留言</small><button class="button primary" type="submit">发布留言</button></div><p class="account-message" id="message-status" aria-live="polite"></p></form><div class="message-list" id="message-list"></div></section></section><section class="view" id="day-view"><section class="day-layout"><button class="back-link" data-view="archive">← 返回日期归档</button><div class="day-head"><p class="eyebrow" id="day-eyebrow">TODAY'S EDITION</p><h1 id="day-title">2026 年 8 月 17 日</h1><p id="day-description">今天收录了 100 篇新故事。</p></div><div class="filter-row" id="filter-row" aria-label="按标签筛选小说"></div><div class="all-story-list" id="day-stories"></div></section></section><section class="view reader-view" id="reader-view"><div class="reader-bar"><button class="back-link" data-view="day">← 回到列表</button><div class="reader-actions"><button class="icon-button" id="font-down" aria-label="缩小字号">A−</button><button class="icon-button" id="font-up" aria-label="放大字号">A+</button><button class="icon-button" id="theme-toggle" aria-label="切换阅读主题">◐</button><button class="bookmark" id="bookmark-button">收藏 ♡</button></div></div><article class="reader-page" id="reader-page"><div class="reader-meta"><span id="reader-category">悬疑</span><span>·</span><span id="reader-date">2026.08.17</span></div><h1 id="reader-title">雨停之前</h1><p class="reader-author" id="reader-author">林野</p><div class="reader-content" id="reader-content"></div></article><div class="reading-progress"><div id="progress-fill"></div></div></section>
   </main>
-
-  <dialog id="search-dialog"><form method="dialog" class="search-modal"><button class="close-button" value="cancel" aria-label="关闭">×</button><p class="eyebrow">SEARCH THE LIBRARY</p><label for="search-input">寻找一个故事</label><input id="search-input" placeholder="输入标题、作者或关键词" autofocus><div id="search-results"></div></form></dialog>
-  <dialog id="account-dialog"><div class="account-modal"><button class="close-button" id="close-account" aria-label="关闭">×</button><p class="eyebrow">MEMBER ACCESS</p><h2 id="account-title">登录</h2><form id="account-form"><label for="account-username" id="account-username-label">用户名或邮箱</label><input id="account-username" type="text" autocomplete="username" required><small class="field-hint" id="username-hint">已有账号可使用原邮箱登录</small><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" minlength="8" required><small class="field-hint" id="password-hint">请输入登录密码</small><p class="account-message" id="account-message" aria-live="polite"></p><button class="button primary" type="submit" id="account-submit">登录</button></form><button class="switch-account" id="switch-account">还没有账号？注册</button><a class="admin-link" id="admin-link" href="admin.html" hidden>进入内容管理 →</a></div></dialog>
-
-  <script src="app.js"></script>
+  <dialog id="search-dialog"><form method="dialog" class="search-modal"><button class="close-button" value="cancel" aria-label="关闭">×</button><p class="eyebrow">SEARCH THE LIBRARY</p><label for="search-input">寻找一个故事</label><input id="search-input" placeholder="输入标题、作者或关键词" autofocus><div id="search-results"></div></form></dialog><dialog id="account-dialog"><div class="account-modal"><button class="close-button" id="close-account" aria-label="关闭">×</button><p class="eyebrow">MEMBER ACCESS</p><h2 id="account-title">登录</h2><form id="account-form"><label for="account-username" id="account-username-label">用户名或邮箱</label><input id="account-username" type="text" autocomplete="username" required><small class="field-hint" id="username-hint">已有账号可使用原邮箱登录</small><label for="account-password">密码</label><input id="account-password" type="password" autocomplete="current-password" minlength="8" required><small class="field-hint" id="password-hint">请输入登录密码</small><p class="account-message" id="account-message" aria-live="polite"></p><button class="button primary" type="submit" id="account-submit">登录</button></form><button class="switch-account" id="switch-account">还没有账号？注册</button><a class="admin-link" id="admin-link" href="admin.html" hidden>进入内容管理 →</a></div></dialog><script src="app.js"></script>
 </body>
 </html>
