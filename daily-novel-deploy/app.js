@@ -41,6 +41,8 @@ function renderDates() {
 function renderFeatured() {
   const date = state.currentDate;
   const target = document.getElementById('featured-stories');
+  const total = state.dates.reduce((sum, item) => sum + Number(item.count || 0), 0);
+  document.getElementById('library-total-count').textContent = total;
   document.getElementById('today-count').textContent = date?.count || 0;
   document.getElementById('featured-count').textContent = date?.count || 0;
   if (!date) {
