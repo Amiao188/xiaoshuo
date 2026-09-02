@@ -1,5 +1,5 @@
-const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜'];
-const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, featuredStories: [], loadingDate: null, dateLoadError: null, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null };
+const TAGS = ['悬疑', '姐弟恋', '白月光', '大女主', '病娇', '豪门霸总', '双男主', '双女主', '先婚后爱', '追妻火葬场', '娱乐圈', '甜宠', '虐恋', '先虐后甜', '宫斗'];
+const state = { dates: [], currentDate: null, currentStories: [], remoteStories: {}, featuredStories: [], loadingDate: null, dateLoadError: null, fontSize: 19, isRegister: false, user: null, selectedTag: '全部', hasSupportQr: false, developerNote: null, selectedMonth: null, listMode: 'day' };
 const DEFAULT_DEVELOPER_NOTE = '感谢你来到日更小说馆。愿这些短篇故事，能陪你度过一段轻松的阅读时间。';
 const filler = ['他没有立刻回答。街边的树影在风里慢慢移动，像有人正在翻一页很旧的书。', '后来他们都记得那个下午，却谁也说不清从哪一句话开始，事情有了不同的方向。'];
 const dateLabel = iso => new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(`${iso}T12:00:00`));
@@ -8,11 +8,14 @@ const dayEnglish = iso => new Intl.DateTimeFormat('en-US', { weekday: 'long', mo
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 
 function showView(name) {
+  const isArchiveJump = name === 'archive';
+  const viewName = isArchiveJump ? 'home' : name;
   document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
-  document.getElementById(`${name}-view`).classList.add('active');
+  document.getElementById(`${viewName}-view`).classList.add('active');
   document.querySelectorAll('.nav-link').forEach(button => button.classList.toggle('active', button.dataset.view === name || (name === 'day' && button.dataset.view === 'archive')));
-  if (name === 'messages') loadMessages();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (viewName === 'messages') loadMessages();
+  if (isArchiveJump) requestAnimationFrame(() => document.getElementById('home-archive').scrollIntoView({ block: 'start', behavior: 'smooth' }));
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function visibleStories() {
@@ -33,9 +36,19 @@ function storyCard(story, index) {
 }
 
 function renderDates() {
-  document.getElementById('date-list').innerHTML = state.dates.length
-    ? state.dates.map(day => `<button class="date-row" data-date="${day.date}"><span class="date">${shortDate(day.date)}</span><strong>${dateLabel(day.date)}</strong><small>${day.count} 篇 · ${day.note || '已归档'}</small><span class="arrow">→</span></button>`).join('')
+  const months = [...new Set(state.dates.map(day => day.date.slice(0, 7)))];
+  if (!months.includes(state.selectedMonth)) state.selectedMonth = months[0] || null;
+  const monthSelect = document.getElementById('month-select');
+  monthSelect.innerHTML = months.map(month => `<option value="${month}">${month.replace('-', ' 年 ')} 月</option>`).join('');
+  monthSelect.value = state.selectedMonth || '';
+  const dates = state.selectedMonth ? state.dates.filter(day => day.date.startsWith(state.selectedMonth)) : state.dates;
+  document.getElementById('date-list').innerHTML = dates.length
+    ? dates.map(day => `<button class="date-row" data-date="${day.date}"><span class="date">${shortDate(day.date)}</span><strong>${dateLabel(day.date)}</strong><small>${day.count} 篇 · ${day.note || '已归档'}</small><span class="arrow">→</span></button>`).join('')
     : '<p class="text-muted">暂时还没有已发布的小说。</p>';
+}
+
+function renderHomeTags() {
+  document.getElementById('home-tag-list').innerHTML = TAGS.map(tag => `<button class="home-tag" data-home-tag="${tag}">${tag}<span>→</span></button>`).join('');
 }
 
 function renderFeatured() {
@@ -61,10 +74,31 @@ function renderFeatured() {
 
 function renderFilters() {
   const total = state.currentStories.length;
-  document.getElementById('filter-row').innerHTML = ['全部', ...TAGS].map(tag => `<button class="filter-chip ${state.selectedTag === tag ? 'selected' : ''}" data-filter="${tag}">${tag}${tag === '全部' ? ` <span>${total}</span>` : ''}</button>`).join('');
+  const filters = state.listMode === 'tag' ? TAGS : ['全部', ...TAGS];
+  document.getElementById('filter-row').innerHTML = filters.map(tag => `<button class="filter-chip ${state.selectedTag === tag ? 'selected' : ''}" data-filter="${tag}">${tag}${tag === '全部' ? ` <span>${total}</span>` : ''}</button>`).join('');
 }
 
 function renderDay() {
+  if (state.listMode === 'tag') {
+    document.getElementById('day-eyebrow').textContent = 'BROWSE BY CATEGORY';
+    document.getElementById('day-title').textContent = `${state.selectedTag}小说`;
+    document.getElementById('day-description').textContent = `全站已收录 ${state.currentStories.length} 篇${state.selectedTag}小说。`;
+    if (state.loadingDate === `tag:${state.selectedTag}`) {
+      document.getElementById('filter-row').innerHTML = '';
+      document.getElementById('day-stories').innerHTML = '<p class="text-muted">正在加载这个类型的小说…</p>';
+      return;
+    }
+    if (state.dateLoadError) {
+      document.getElementById('filter-row').innerHTML = '';
+      document.getElementById('day-stories').textContent = state.dateLoadError;
+      return;
+    }
+    renderFilters();
+    document.getElementById('day-stories').innerHTML = state.currentStories.length
+      ? state.currentStories.map((story, index) => `<button class="list-story" data-story="${story.id}"><span class="index">${String(index + 1).padStart(3, '0')}</span><strong>${escapeHtml(story.title)}</strong><span class="author">${escapeHtml(story.author)}</span><span class="tag">${escapeHtml(story.tag)}</span><span>→</span></button>`).join('')
+      : '<p class="text-muted">这个类型下还没有已发布的小说。</p>';
+    return;
+  }
   const date = state.currentDate;
   if (!date) {
     document.getElementById('day-eyebrow').textContent = 'DAILY ARCHIVE';
@@ -98,6 +132,7 @@ async function selectDate(date) {
   const entry = state.dates.find(day => day.date === date) || state.dates[0];
   if (!entry) return;
   state.currentDate = entry;
+  state.listMode = 'day';
   state.selectedTag = '全部';
   if (state.remoteStories[entry.date]) {
     state.currentStories = state.remoteStories[entry.date];
@@ -123,6 +158,26 @@ async function selectDate(date) {
   }
 }
 
+async function selectTag(tag) {
+  state.listMode = 'tag';
+  state.selectedTag = tag;
+  state.currentStories = [];
+  state.loadingDate = `tag:${tag}`;
+  state.dateLoadError = null;
+  renderDay();
+  try {
+    const response = await fetch(`api/library?tag=${encodeURIComponent(tag)}`);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || '类型小说加载失败');
+    state.currentStories = result.stories || [];
+  } catch (error) {
+    state.dateLoadError = error.message;
+  } finally {
+    state.loadingDate = null;
+    renderDay();
+  }
+}
+
 async function openStory(id, rememberHistory = true) {
   let story = state.currentStories.find(item => item.id === id);
   if (!story) {
@@ -133,6 +188,8 @@ async function openStory(id, rememberHistory = true) {
     }
   }
   if (!story) return;
+  const storyDate = state.dates.find(day => day.date === story.publish_date);
+  if (storyDate) state.currentDate = storyDate;
   if (!story.content) {
     try {
       const response = await fetch(`api/library?storyId=${encodeURIComponent(story.id)}`, { cache: 'no-store' });
@@ -148,7 +205,7 @@ async function openStory(id, rememberHistory = true) {
   document.getElementById('reader-title').textContent = story.title;
   document.getElementById('reader-author').textContent = story.author;
   document.getElementById('reader-category').textContent = story.tag;
-  document.getElementById('reader-date').textContent = state.currentDate.date.replaceAll('-', '.');
+  document.getElementById('reader-date').textContent = story.publish_date.replaceAll('-', '.');
   const target = document.getElementById('reader-content');
   target.replaceChildren(...content.map(paragraph => {
     const node = document.createElement('p');
@@ -158,7 +215,7 @@ async function openStory(id, rememberHistory = true) {
   if (rememberHistory) {
     const readerUrl = new URL(window.location.href);
     readerUrl.hash = 'reading';
-    history.pushState({ view: 'reader', date: state.currentDate.date, storyId: story.id }, '', readerUrl);
+    history.pushState({ view: 'reader', date: story.publish_date, storyId: story.id, listMode: state.listMode, tag: state.selectedTag }, '', readerUrl);
   }
   showView('reader');
 }
@@ -178,6 +235,7 @@ async function loadLibrary() {
     state.currentStories = [];
   }
   renderDates();
+  renderHomeTags();
   renderFeatured();
   renderDay();
 }
@@ -249,14 +307,26 @@ document.addEventListener('click', async event => {
   if (storyButton) return openStory(storyButton.dataset.story);
   const dateButton = event.target.closest('[data-date]');
   if (dateButton) { showView('day'); await selectDate(dateButton.dataset.date); return; }
+  const homeTag = event.target.closest('[data-home-tag]');
+  if (homeTag) { showView('day'); await selectTag(homeTag.dataset.homeTag); return; }
   const filter = event.target.closest('[data-filter]');
-  if (filter) { state.selectedTag = filter.dataset.filter; renderDay(); }
+  if (filter) {
+    if (state.listMode === 'tag') await selectTag(filter.dataset.filter);
+    else { state.selectedTag = filter.dataset.filter; renderDay(); }
+  }
 });
+
+document.getElementById('month-select').addEventListener('change', event => { state.selectedMonth = event.target.value; renderDates(); });
 
 document.getElementById('random-button').addEventListener('click', async () => {
   if (!state.currentStories.length && state.currentDate) await selectDate(state.currentDate.date);
   const story = state.currentStories[Math.floor(Math.random() * state.currentStories.length)];
   if (story) openStory(story.id);
+});
+document.getElementById('browse-today').addEventListener('click', async () => {
+  if (!state.currentDate) return;
+  showView('day');
+  await selectDate(state.currentDate.date);
 });
 document.getElementById('search-button').addEventListener('click', () => { document.getElementById('search-dialog').showModal(); document.getElementById('search-input').focus(); });
 document.getElementById('search-input').addEventListener('input', event => {
@@ -316,7 +386,8 @@ window.addEventListener('scroll', () => {
 window.addEventListener('popstate', async event => {
   const page = event.state;
   if (page?.view === 'reader' && page.date && page.storyId) {
-    await selectDate(page.date);
+    if (page.listMode === 'tag' && TAGS.includes(page.tag)) await selectTag(page.tag);
+    else await selectDate(page.date);
     await openStory(page.storyId, false);
     return;
   }

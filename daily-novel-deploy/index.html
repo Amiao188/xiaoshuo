@@ -27,7 +27,7 @@
           <p class="library-total" aria-live="polite"><span>已收录</span><strong id="library-total-count">0</strong><span>篇小说</span></p>
           <details class="developer-note" id="developer-note"><summary><span>开发者有话说</span><span class="developer-note-toggle">查看更多</span></summary><div class="developer-note-body"><p id="developer-note-body"></p><div class="developer-support" id="developer-support" hidden><img id="developer-support-qr" loading="lazy" alt="支持小说馆的收款码"><small>感谢每一份支持</small></div></div></details>
           <div class="hero-actions">
-            <button class="button primary" data-view="archive">浏览今日 <span id="today-count">0</span> 篇 <span>→</span></button>
+            <button class="button primary" id="browse-today">浏览今日 <span id="today-count">0</span> 篇 <span>→</span></button>
             <button class="button text-button" id="random-button">随便读一篇 <span>↗</span></button>
           </div>
         </div>
@@ -45,6 +45,27 @@
         </div>
         <div class="story-grid" id="featured-stories"></div>
       </section>
+
+      <section class="home-discovery" aria-labelledby="category-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">BROWSE BY CATEGORY</p><h2 id="category-title">按类型找小说</h2></div>
+          <p class="section-note">从全站已收录内容中查找</p>
+        </div>
+        <div class="home-tag-list" id="home-tag-list" aria-label="小说类型"></div>
+      </section>
+
+      <section class="home-archive" id="home-archive">
+        <div class="archive-head">
+          <p class="eyebrow">THE DAILY ARCHIVE</p>
+          <h1>按日期，找到那天的故事。</h1>
+          <p>每一天的更新都安放在独立的一页里。慢慢翻，也可以直接选择日期。</p>
+        </div>
+        <div class="archive-tools">
+          <label class="month-label" for="month-select">选择月份</label>
+          <select id="month-select"></select>
+        </div>
+        <div class="date-list" id="date-list"></div>
+      </section>
     </section>
 
     <section class="view" id="messages-view">
@@ -57,21 +78,6 @@
           <p class="account-message" id="message-status" aria-live="polite"></p>
         </form>
         <div class="message-list" id="message-list"></div>
-      </section>
-    </section>
-
-    <section class="view" id="archive-view">
-      <section class="archive-layout">
-        <div class="archive-head">
-          <p class="eyebrow">THE DAILY ARCHIVE</p>
-          <h1>按日期，找到那天的故事。</h1>
-          <p>每一天的更新都安放在独立的一页里。慢慢翻，也可以直接选择日期。</p>
-        </div>
-        <div class="archive-tools">
-          <label class="month-label" for="month-select">选择月份</label>
-          <select id="month-select"><option>2026 年 8 月</option><option>2026 年 7 月</option></select>
-        </div>
-        <div class="date-list" id="date-list"></div>
       </section>
     </section>
 
